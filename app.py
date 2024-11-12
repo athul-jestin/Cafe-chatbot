@@ -11,9 +11,8 @@ def cached_load_data():
 data = cached_load_data()
 
 # Display dataset overview
-st.title("GPT-Driven Data Visualization Chatbot")
-st.write("Dataset Overview:")
-st.write(data.head())
+st.title("Cafe-Chatbot")
+st.subheader("GPT-Driven Data Visualization Chatbot")
 
 # Get user input for visualization request
 user_query = st.text_input("Ask a question or request a visualization:")
