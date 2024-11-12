@@ -36,17 +36,12 @@ if st.button("Send"):
 
         # Load data and get GPT response
         data = load_data()
-        explanation, generated_code = get_visualization_code(user_query, data)
-        
-        # Add explanation to chat history
-        add_to_chat("assistant", explanation)
-        
+        generated_code = get_visualization_code(user_query, data)
+        generated_code = generated_code.replace('```', '')
+    
         # Add generated code to chat history
         add_to_chat("assistant", "Generated Code:\n" + generated_code)
         
-        # Display explanation and code
-        st.markdown("## Explanation")
-        st.markdown(explanation)
         
         st.markdown("## Generated Code")
         st.code(generated_code, language="python")

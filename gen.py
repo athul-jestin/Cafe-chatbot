@@ -25,10 +25,10 @@ def get_visualization_code(prompt, data):
     response = openai.ChatCompletion.create(  # Use ChatCompletion instead of Chat
         model="gpt-3.5-turbo",
         messages=[
-            {"role": "system", "content": "You are a helpful assistant that generates code and explanations for data visualization."},
+            {"role": "system", "content": "You are a helpful assistant that generates only code line for data visualization, without any other sentences or commands of symbols."},
             {"role": "user", "content": gpt_prompt}
         ],
-        max_tokens=300,
+        max_tokens=1000,
         temperature=0.5
     )
 
@@ -37,4 +37,4 @@ def get_visualization_code(prompt, data):
     # Separate the explanation and code if possible (using a simple split approach here)
     explanation, generated_code = message_content.split('\n', 1)  # Split the explanation from the code
 
-    return explanation, generated_code
+    return generated_code
