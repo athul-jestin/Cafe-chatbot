@@ -15,23 +15,26 @@ def load_data():
 
 # Function to get GPT-3.5-generated code for visualization
 def get_visualization_code(prompt, data):
-    # Create the prompt to instruct GPT to generate code
+    col=', '.join(data.columns)
     gpt_prompt = (
         f"Generate Python code using pandas and matplotlib for the following dataset analysis "
-        f"or visualization task:\n\nDataset columns: {', '.join(data.columns)}\nTask: {prompt}\n"
+        f"or visualization task. First, provide a brief explanation of the approach, "
+        f"then provide the code.\n\nDataset columns: {col}\nTask: {prompt}\n"
     )
-    
-    # Request code generation from GPT-3.5 using the Chat API
-    response = openai.ChatCompletion.create(
+
+    response = openai.ChatCompletion.create(  # Use ChatCompletion instead of Chat
         model="gpt-3.5-turbo",
         messages=[
-            {"role": "system", "content": "You are a helpful assistant that generates code for data visualization."},
+            {"role": "system", "content": "You are a helpful assistant that generates code and explanations for data visualization."},
             {"role": "user", "content": gpt_prompt}
         ],
-        max_tokens=150,
+        max_tokens=300,
         temperature=0.5
     )
-    
-    # Extract the generated code
-    code = response['choices'][0]['message']['content'].strip()
-    return code
+
+    message_content = response['choices'][0]['message']['content'].strip()
+
+    # Separate the explanation and code if possible (using a simple split approach here)
+    explanation, generated_code = message_content.split('\n', 1)  # Split the explanation from the code
+
+    return explanation, generated_code
