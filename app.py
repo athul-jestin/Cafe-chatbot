@@ -44,10 +44,11 @@ if st.button("Send"):
         data = load_data()
         generated_code = get_visualization_code(user_query, data)
         generated_code = generated_code.replace('```', '')
+        #st.session_state["user_input"] = ""
     
         # Add generated code to chat history
         add_to_chat("assistant", "Generated Code:\n" + generated_code)
-        # st.code(generated_code, language="python")
+        st.code(generated_code, language="python")
 
         # Attempt to execute generated code and display visualization
         try:
@@ -59,5 +60,4 @@ if st.button("Send"):
             add_to_chat("assistant", error_message)
             st.error(error_message)
         
-        # Clear the user input
-        st.session_state.user_input = ""
+
