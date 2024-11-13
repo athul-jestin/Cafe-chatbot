@@ -25,7 +25,7 @@ def get_visualization_code(prompt, data):
     response = openai.ChatCompletion.create(  # Use ChatCompletion instead of Chat
         model="gpt-3.5-turbo",
         messages=[
-            {"role": "system", "content": "You are a helpful assistant that generates only code line for data visualization, without any other sentences or commands of symbols."},
+            {"role": "system", "content": "You are a helpful assistant that generates only code line for data visualization, without any other sentences and remove all commands and other symbols."},
             {"role": "user", "content": gpt_prompt}
         ],
         max_tokens=1000,

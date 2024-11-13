@@ -1,6 +1,9 @@
+import pandas as pd
 import streamlit as st
 import matplotlib.pyplot as plt
 from gen import load_data, get_visualization_code
+
+df=pd.read_pickle("cleaned_data.pkl")
 
 # Page configuration
 st.set_page_config(layout="centered")  # Center layout without sidebar
@@ -12,6 +15,9 @@ st.subheader("GPT-Driven Data Visualization Chatbot")
 # Initialize session state for chat history
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
+
+if "user_input" not in st.session_state:
+    st.session_state.user_input = ""
 
 # Function to add message to chat history
 def add_to_chat(role, message):
@@ -41,14 +47,11 @@ if st.button("Send"):
     
         # Add generated code to chat history
         add_to_chat("assistant", "Generated Code:\n" + generated_code)
-        
-        
-        st.markdown("## Generated Code")
-        st.code(generated_code, language="python")
+        # st.code(generated_code, language="python")
 
         # Attempt to execute generated code and display visualization
         try:
-            exec(generated_code)
+            exec(generated_code,{"df": df, "plt": plt})
             st.pyplot(plt.gcf())
             plt.clf()  # Clear the plot after displaying to prevent overlap
         except Exception as e:
