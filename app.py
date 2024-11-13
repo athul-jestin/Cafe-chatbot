@@ -1,63 +1,75 @@
 import pandas as pd
+import io
 import streamlit as st
 import matplotlib.pyplot as plt
+from PIL import Image
+from langchain.schema import (
+    SystemMessage,
+    HumanMessage,
+    AIMessage
+)
 from gen import load_data, get_visualization_code
 
-df=pd.read_pickle("cleaned_data.pkl")
+# Load data
+df = load_data()
 
 # Page configuration
-st.set_page_config(layout="centered")  # Center layout without sidebar
+st.set_page_config(layout="centered")
 
 # Title and subheader
-st.title("Cafe-Chatbot")
+st.header("Cafe-Chatbot")
 st.subheader("GPT-Driven Data Visualization Chatbot")
 
 # Initialize session state for chat history
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
 
-if "user_input" not in st.session_state:
-    st.session_state.user_input = ""
+for chat in st.session_state.chat_history:
+    if chat["role"] == "user" and chat["content_type"] == "text":
+        st.markdown(f"**You:** {chat['content']}")
+    elif chat["role"] == "user" and chat["content_type"] == "image":
+        st.markdown("**You uploaded an image:**")
+        st.image(chat["content"])
+#    elif chat["role"] == "assistant":
+#         st.markdown(f"**Assistant:** {chat['content']}")
 
 # Function to add message to chat history
-def add_to_chat(role, message):
-    st.session_state.chat_history.append({"role": role, "message": message})
+def add_to_chat(role, content_type, content):
+    st.session_state.chat_history.append({
+        "role": role,
+        "content_type": content_type,
+        "content": content
+    })
+    if role == "user" and content_type == "text":
+        st.markdown(f"**You:** {content}")
+    elif role == "assistant" and content_type == "image":
+        st.markdown("**Cafe-Chatbot:** Generated output")
+        st.image(content)
+    elif role == "assistant":
+        st.markdown("**Cafe-Chatbot:** Generated output")
+        st.markdown(f"**Assistant:** {content}")
 
-# Display chat history in a scrollable container
-with st.container():
-    for chat in st.session_state.chat_history:
-        if chat["role"] == "user":
-            st.markdown(f"**You:** {chat['message']}")
-        elif chat["role"] == "assistant":
-            st.markdown(f"**Cafe-Chatbot:** {chat['message']}")
+# Input for user query (fixed at the bottom, centered)
+with st.sidebar:
+    user_input = st.text_input("Ask a question or request a visualization:", key="user_input", max_chars=500)
+    button=st.button("Send")
 
-# Input for user query
-user_query = st.text_input("Ask a question or request a visualization:", key="user_input")
+# Button to submit query (fixed at the bottom next to input)
+if button:
+    if user_input:
+        add_to_chat("user", "text", user_input)
+        if user_input:
+            generated_code = get_visualization_code(user_input, df).replace('```', '')
+            try:
+                # Ensure that pandas and plt are available in the execution context
+                exec(generated_code, {"df": df, "plt": plt, "pd": pd})
+                output_path="generated_plot.png"
+                plt.savefig(output_path, format="png")
+                img=Image.open("generated_plot.png")
+                add_to_chat("assistant", "image", img)
+                plt.clf()
 
-# Button to submit query
-if st.button("Send"):
-    if user_query:
-        # Add user's question to chat history
-        add_to_chat("user", user_query)
-
-        # Load data and get GPT response
-        data = load_data()
-        generated_code = get_visualization_code(user_query, data)
-        generated_code = generated_code.replace('```', '')
-        #st.session_state["user_input"] = ""
-    
-        # Add generated code to chat history
-        # add_to_chat("assistant", "Generated Code:\n" + generated_code)
-        # st.code(generated_code, language="python")
-
-        # Attempt to execute generated code and display visualization
-        try:
-            exec(generated_code,{"df": df, "plt": plt})
-            st.pyplot(plt.gcf())
-            plt.clf()  # Clear the plot after displaying to prevent overlap
-        except Exception as e:
-            error_message = f"Error executing code: {e}"
-            add_to_chat("assistant", error_message)
-            st.error(error_message)
-        
-
+            except Exception as e:
+                error_message = f"Error executing code: {e}"
+                add_to_chat("assistant", error_message)
+                st.error(error_message)
