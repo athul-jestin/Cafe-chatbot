@@ -47,8 +47,8 @@ if st.button("Send"):
         #st.session_state["user_input"] = ""
     
         # Add generated code to chat history
-        add_to_chat("assistant", "Generated Code:\n" + generated_code)
-        st.code(generated_code, language="python")
+        # add_to_chat("assistant", "Generated Code:\n" + generated_code)
+        # st.code(generated_code, language="python")
 
         # Attempt to execute generated code and display visualization
         try:

@@ -15,11 +15,17 @@ def load_data():
 
 # Function to get GPT-3.5-generated code for visualization
 def get_visualization_code(prompt, data):
-    col=', '.join(data.columns)
+    col_names=', '.join(data.columns)
+    sample_data = data.head(3).to_dict()  # Convert first few rows to a dictionary format
+
+    # Create the prompt including column names and a few rows of sample data
     gpt_prompt = (
-        f"Generate Python code using pandas and matplotlib for the following dataset analysis "
-        f"or visualization task. First, provide a brief explanation of the approach, "
-        f"then provide the code.\n\nDataset columns: {col}\nTask: {prompt}\n"
+        f"Analyze the following dataset based on the request below and generate Python code using pandas and matplotlib "
+        f"to complete the analysis or create a visualization. First, provide a brief explanation of the approach, "
+        f"then generate the code. Sample data is given with only 3 rows, generate the code assuming that there are 2000+ rows, delfine the data frame in the codes as df\n\n"
+        f"Column Names: {col_names}\n"
+        f"Sample Data (first 3 rows): {sample_data}\n\n"
+        f"Task: {prompt}\n"
     )
 
     response = openai.ChatCompletion.create(  # Use ChatCompletion instead of Chat
