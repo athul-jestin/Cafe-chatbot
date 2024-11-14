@@ -3,11 +3,6 @@ import io
 import streamlit as st
 import matplotlib.pyplot as plt
 from PIL import Image
-from langchain.schema import (
-    SystemMessage,
-    HumanMessage,
-    AIMessage
-)
 from gen import load_data, get_visualization_code
 
 # Load data
@@ -27,8 +22,8 @@ if "chat_history" not in st.session_state:
 for chat in st.session_state.chat_history:
     if chat["role"] == "user" and chat["content_type"] == "text":
         st.markdown(f"**You:** {chat['content']}")
-    elif chat["role"] == "user" and chat["content_type"] == "image":
-        st.markdown("**You uploaded an image:**")
+    elif chat["role"] == "assistant" and chat["content_type"] == "image":
+        st.markdown("**Generated output:**")
         st.image(chat["content"])
 #    elif chat["role"] == "assistant":
 #         st.markdown(f"**Assistant:** {chat['content']}")
