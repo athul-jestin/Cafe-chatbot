@@ -1,5 +1,4 @@
 import pandas as pd
-import io
 import streamlit as st
 import matplotlib.pyplot as plt
 from PIL import Image
