@@ -48,14 +48,12 @@ with st.sidebar:
     user_input = st.text_input("Ask a question or request a visualization:", key="user_input", max_chars=500)
     button=st.button("Send")
 
-# Button to submit query (fixed at the bottom next to input)
 if button:
     if user_input:
         add_to_chat("user", "text", user_input)
         if user_input:
             generated_code = get_visualization_code(user_input, df).replace('```', '')
             try:
-                # Ensure that pandas and plt are available in the execution context
                 exec(generated_code, {"df": df, "plt": plt, "pd": pd})
                 output_path="generated_plot.png"
                 plt.savefig(output_path, format="png")
