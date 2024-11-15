@@ -3,9 +3,10 @@ import streamlit as st
 import matplotlib.pyplot as plt
 from PIL import Image
 from gen import load_data, get_visualization_code
+from recommendation import get_visualization_recommendations
 
 # Load data
-df = load_data()
+data = load_data()
 
 # Page configuration
 st.set_page_config(layout="centered")
@@ -22,10 +23,10 @@ for chat in st.session_state.chat_history:
     if chat["role"] == "user" and chat["content_type"] == "text":
         st.markdown(f"**You:** {chat['content']}")
     elif chat["role"] == "assistant" and chat["content_type"] == "image":
-        st.markdown("**Generated output:**")
+        #st.markdown("**Cafe-Chatbot:**")
         st.image(chat["content"])
-#    elif chat["role"] == "assistant":
-#         st.markdown(f"**Assistant:** {chat['content']}")
+    elif chat["role"] == "assistant" and chat["content_type"] == "text":
+         st.markdown(f"**Cafe-Chatbot:** {chat['content']}")
 
 # Function to add message to chat history
 def add_to_chat(role, content_type, content):
@@ -37,11 +38,10 @@ def add_to_chat(role, content_type, content):
     if role == "user" and content_type == "text":
         st.markdown(f"**You:** {content}")
     elif role == "assistant" and content_type == "image":
-        st.markdown("**Cafe-Chatbot:** Generated output")
+        #st.markdown("**Cafe-Chatbot:**")
         st.image(content)
-    elif role == "assistant":
-        st.markdown("**Cafe-Chatbot:** Generated output")
-        st.markdown(f"**Assistant:** {content}")
+    elif role == "assistant" and content_type == "text":
+        st.markdown(f"**Cafe-Chatbot:** {content}")
 
 # Input for user query (fixed at the bottom, centered)
 with st.sidebar:
@@ -51,17 +51,13 @@ with st.sidebar:
 if button:
     if user_input:
         add_to_chat("user", "text", user_input)
-        if user_input:
-            generated_code = get_visualization_code(user_input, df).replace('```', '')
-            try:
-                exec(generated_code, {"df": df, "plt": plt, "pd": pd})
-                output_path="generated_plot.png"
-                plt.savefig(output_path, format="png")
-                img=Image.open("generated_plot.png")
-                add_to_chat("assistant", "image", img)
-                plt.clf()
-
-            except Exception as e:
-                error_message = f"Error executing code: {e}"
-                add_to_chat("assistant", error_message)
-                st.error(error_message)
+        recom=get_visualization_recommendations(user_input, data)
+        text=(f"I recommend to plot a {recom}")
+        add_to_chat("assistant", "text", text)
+        generated_code = get_visualization_code(recom, user_input, data).replace('```', '').replace('python', '')
+        exec(generated_code, {"data": data, "plt": plt, "pd": pd})
+        output_path="generated_plot.png"
+        plt.savefig(output_path, format="png")
+        img=Image.open("generated_plot.png")
+        add_to_chat("assistant", "image", img)
+        plt.clf()
